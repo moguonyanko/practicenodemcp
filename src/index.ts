@@ -7,9 +7,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod"
-
-const REV_GEOCODING_BASE = "https://nominatim.openstreetmap.org/reverse"
-const USER_AGENT = "my-reverse-geocoding-app/1.0"
+import { getAddress } from "./reverse_geocoding.js"
 
 /**
  * 逆ジオコーディングAPIを使用して、指定された緯度と経度から住所を取得するMCPサーバーを作成します。
@@ -23,37 +21,6 @@ const revGeocodingServer = new McpServer({
   },
 })
 
-async function doRequest<T>(url: string): Promise<T | null> {
-  const headers = {
-    "User-Agent": USER_AGENT,
-    Accept: "application/json",
-  }
-
-  try {
-    const response = await fetch(url, { headers })
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return (await response.json()) as T
-  } catch (error) {
-    console.error(`HTTP request error:${error}`)
-    throw error
-  }
-}
-
-interface AddressResponse {
-  properties: {
-    address: Record<string, string>
-  }
-}
-
-const getAddress = async ({ latitude, longitude }: { latitude: number; longitude: number }) => {
-    const pointsUrl = `${REV_GEOCODING_BASE}?lat=${latitude.toFixed(4)}&lon=${longitude.toFixed(4)}&format=json`
-    const addressData = await doRequest<AddressResponse>(pointsUrl)
-
-    return addressData
-}
-
 revGeocodingServer.tool(
   "execute-reverse-geocoding",
   "緯度経度から逆ジオコーディングを実行し、住所を取得します。",
@@ -62,28 +29,16 @@ revGeocodingServer.tool(
     longitude: z.number().min(-180).max(180).describe("経度"),
   },
   async ({ latitude, longitude }) => {
-    const pointsData = await getAddress({ latitude, longitude })
+    const address = await getAddress({ latitude, longitude })
 
-    if (!pointsData) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Failed to retrieve grid point data for coordinates: ${latitude}, ${longitude}. This location may not be supported by the NWS API (only US locations are supported).`,
-          },
-        ],
-      }
-    }
-
-    const address = pointsData.properties?.address || {}
     if (Object.values(address).length === 0) {
       return {
         content: [
           {
             type: "text",
-            text: "住所が見つかりませんでした。",
-          },
-        ],
+            text: `住所が見つかりませんでした。:緯度=${latitude}, 経度=${longitude}`
+          }
+        ]
       }
     }
 
@@ -91,9 +46,9 @@ revGeocodingServer.tool(
       content: [
         {
           type: "text",
-          text: JSON.stringify(address),
-        },
-      ],
+          text: JSON.stringify(address)
+        }
+      ]
     }
   }
 )
@@ -101,12 +56,10 @@ revGeocodingServer.tool(
 async function main() {
   const transport = new StdioServerTransport()
   await revGeocodingServer.connect(transport)
-  console.error("MCP Server running on stdio")
+  console.info("MCP Server running on stdio")
 }
 
-try {
-  await main()
-} catch (error) {
+main().catch((error) => {
   console.error("Error starting MCP server:", error)
   process.exit(1)
-}
+})
