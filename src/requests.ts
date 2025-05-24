@@ -1,6 +1,7 @@
 /**
- * 逆ジオコーディングを行う関数を含むモジュール
- * @module reverse_geocoding
+ * @module requests
+ * @description
+ * このモジュールは、指定されたURLにGETリクエストを送り、レスポンスをJSONとして返す関数を提供します。
  */
 
 /**
