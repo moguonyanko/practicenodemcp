@@ -59,7 +59,10 @@ async function main() {
   console.error("MCP Server running on stdio")
 }
 
-main().catch((error) => {
+try {
+  // MCPサーバーを起動
+  await main()
+} catch (error) {
   console.error("Error starting MCP server:", error)
   process.exit(1)
-})
+}

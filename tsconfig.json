@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext", // commonjsを指定しているためESの新しい機能は利用できない。
+    "module": "NodeNext",
     "outDir": "./build",
     "rootDir": "./src",
     "strict": true,
@@ -11,5 +11,9 @@
     "isolatedModules": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/**/*.test.ts", // テストを除外しないとビルド時にエラー
+    "src/**/*.spec.ts"  // こちらも同様
+  ]
 }
