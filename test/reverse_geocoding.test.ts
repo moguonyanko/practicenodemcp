@@ -2,7 +2,7 @@
  * 逆ジオコーディングを行う関数のテスト
  */
 
-import { getAddress } from './reverse_geocoding.js'
+import { getAddress } from '../src/reverse_geocoding.js'
 
 describe('Reverse Geocoding Functions', () => {
   describe('getAddress', () => {
