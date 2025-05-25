@@ -2,7 +2,7 @@
  * 逆ジオコーディングを行う関数を含むモジュール
  * @module reverse_geocoding
  */
-import { requestJson } from "./requests";
+import { requestJson } from "./requests.js";
 
 const REV_GEOCODING_BASE = "https://nominatim.openstreetmap.org/reverse"
 const USER_AGENT = "my-reverse-geocoding-app/1.0"

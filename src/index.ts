@@ -56,7 +56,7 @@ revGeocodingServer.tool(
 async function main() {
   const transport = new StdioServerTransport()
   await revGeocodingServer.connect(transport)
-  console.info("MCP Server running on stdio")
+  console.error("MCP Server running on stdio")
 }
 
 main().catch((error) => {
